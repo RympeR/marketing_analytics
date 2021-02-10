@@ -1,0 +1,12 @@
+{
+    "creds":[
+        {
+            "login":"123",
+            "password":"234"
+        },
+        {
+            "login":"123",
+            "password":"234"
+        }
+    ]
+}
