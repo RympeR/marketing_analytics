@@ -102,5 +102,7 @@ PMC | Neuro serve | Single scrapping server
 ### Список условных сокращений
 
 PMC - parser main controller ( используется для управления всеми остальными парсерами )
+
 VPS - virtual private server
+
 API - application programm interface
