@@ -19,6 +19,9 @@ class Client(models.Model):
         managed = False
         db_table = 'client'
 
+    def __str__(self):
+        return self.login
+    
 
 class ClientWork(models.Model):
     client_work_id = models.BigAutoField(primary_key=True)
@@ -29,7 +32,8 @@ class ClientWork(models.Model):
         managed = False
         db_table = 'client_work'
 
-
+    def __str__(self):
+        return self.client + ' -- ' + self.work_category
 class ClientWorkPreferences(models.Model):
     client_work_preferences_id = models.BigAutoField(primary_key=True)
     client = models.ForeignKey(Client, models.DO_NOTHING)
@@ -39,7 +43,8 @@ class ClientWorkPreferences(models.Model):
         managed = False
         db_table = 'client_work_preferences'
 
-
+    def __str__(self):
+        return self.client + ' -- ' + self.work_category
 class Scrapper(models.Model):
     scrapper_id = models.AutoField(primary_key=True)
     address = models.TextField()
@@ -53,24 +58,27 @@ class Scrapper(models.Model):
         managed = False
         db_table = 'scrapper'
 
-
+    def __str__(self):
+        return self.address + ' -- ' + self.login
 class Vacancy(models.Model):
-    vacancy_id = models.AutoField(primary_key=True)
-    vacancy_name = models.TextField()
-    expirience = models.FloatField(blank=True, null=True)
-    effectivness = models.FloatField(blank=True, null=True)
-    posted_date = models.DateField(blank=True, null=True)
-    website_name = models.TextField()
-    salary = models.FloatField(blank=True, null=True)
-    city = models.TextField(blank=True, null=True)
-    country = models.TextField(blank=True, null=True)
-    company = models.TextField(blank=True, null=True)
-
+    vacancy_id = models.AutoField(verbose_name='Айди вакансии',primary_key=True)
+    vacancy_name = models.TextField(verbose_name='Название вакансии',)
+    expirience = models.FloatField(verbose_name='Опыт рабооты',blank=True, null=True)
+    effectivness = models.FloatField(verbose_name='Перспективность вакансии',blank=True, null=True)
+    posted_date = models.DateField(verbose_name='Дата публикации вакансии',blank=True, null=True)
+    website_name = models.TextField(verbose_name='Названгие вебсайта',)
+    salary = models.FloatField(verbose_name='Зарплата',blank=True, null=True)
+    city = models.TextField(verbose_name='Город',blank=True, null=True)
+    country = models.TextField(verbose_name='Страна',blank=True, null=True)
+    company = models.TextField(verbose_name='Компания',blank=True, null=True)
+    work_category = models.ForeignKey('WorkCategory', models.DO_NOTHING,blank=True, null=True, verbose_name='Категория вакансии')
     class Meta:
         managed = False
         db_table = 'vacancy'
-
-
+        verbose_name = 'Вакансия'
+        verbose_name_plural = 'Вакансии'
+    def __str__(self):
+        return self.vacancy_name
 class WorkCategory(models.Model):
     work_category_id = models.AutoField(primary_key=True)
     category_name = models.TextField()
@@ -78,3 +86,6 @@ class WorkCategory(models.Model):
     class Meta:
         managed = False
         db_table = 'work_category'
+
+    def __str__(self):
+        return self.category_name
