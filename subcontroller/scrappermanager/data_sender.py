@@ -17,7 +17,7 @@ class DataSender:
     def __init__(self, NEURO_URL):
         self.neuro_url = NEURO_URL
 
-    def send_data(self, url: str, data: dict):
+    def send_data(self, data: dict):
         response = 500
         while response != 200:
             response = requests.get(self.neuro_url)

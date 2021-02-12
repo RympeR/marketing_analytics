@@ -1,6 +1,7 @@
 import requests
 import random
 import ujson
+from typing import Optional
 from scrapperinterface import ScrapperApi
 
 

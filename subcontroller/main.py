@@ -1,11 +1,13 @@
 from fastapi import FastAPI
 from typing import Optional
+import os
+os.sys.path.append('..')
 
-from dirmanager.init_file import *
-from scrappermanager.init_file import *
+# from dirmanager.init_file import *
+# from scrappermanager.init_file import *
 
-from psycopg_models import *
-from models import *
+# from psycopg_models import *
+# from models import *
 
 
 app = FastAPI()

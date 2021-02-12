@@ -16,6 +16,10 @@ class Datamaster(abc):
     def getVacancysPack(self, VacancysInPack=100):
         pass
 
+    @abc.abstractmethod
+    def saveVacansys(self, vacansys):
+        pass
+
 
 class RabotaApiDataMaster(Datamaster):
     def __init__(self):
@@ -25,6 +29,9 @@ class RabotaApiDataMaster(Datamaster):
         pass
 
     def getVacancysPack(self, VacancysInPack=100):
+        pass
+
+    def saveVacansys(self, vacansys):
         pass
 
 
@@ -38,6 +45,9 @@ class WorkUaApiDataMaster(Datamaster):
     def getVacancysPack(self, VacancysInPack=100):
         pass
 
+    def saveVacansys(self, vacansys):
+        pass
+
 
 class HHApiDataMaster(Datamaster):
     def __init__(self):
@@ -49,6 +59,9 @@ class HHApiDataMaster(Datamaster):
     def getVacancysPack(self, VacancysInPack=100):
         pass
 
+    def saveVacansys(self, vacansys):
+        pass
+
 
 class DouApiDataMaster(Datamaster):
     def __init__(self):
@@ -58,4 +71,7 @@ class DouApiDataMaster(Datamaster):
         pass
 
     def getVacancysPack(self, VacancysInPack=100):
+        pass
+
+    def saveVacansys(self, vacansys):
         pass
