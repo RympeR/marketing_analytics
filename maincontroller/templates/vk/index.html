@@ -1,0 +1,741 @@
+{% extends 'base.html' %}
+{% block title %}VK парсер{% endblock title %}
+{% load static %}
+<div class="container col-lg-12 col-xl-10">
+    <main role="main" class="pb-3">
+        <form action="" method="post">
+            {% csrf_token %}
+            <div>
+
+                {% block name_page %}VK{% endblock name_page %}
+
+                {% block main_content %}
+                    <table class="table table-striped table-hover text-center uk-table">
+                        <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Парсер</th>
+                            <th scope="col">Адрес</th>
+                            <th scope="col">Страна</th>
+                            <th scope="col">Город</th>
+                            <th scope="col">Возраст</th>
+                            <th scope="col">Обработано профилей</th>
+                            <th scope="col">Обработано фото</th>
+                            <th scope="col">Действие</th>
+                            <th scope="col" style="padding: 0; margin-top: -5px" class="custom-hover">
+                                <a id='reloadBTN'>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" id="animation"
+                                         style="margin-top: -35px; margin-right: 5px;">
+                                        <path d="M10.762 19.632l-.001.09.419.896c.177.39.01.85-.377 1.034-.256.12-.478.146-.666.077-.188-.068-.283-.103-.402-.358L8.36 18.422c-.179-.384-.008-.854.411-1.128l2.948-1.374a.785.785 0 0 1 1.033.376c.178.389.011.85-.375 1.034l-1.006.503c3.01.204 5.98-1.59 6.5-4.537a5.773 5.773 0 0 0-.973-4.337l-.094-.128a.91.91 0 0 1 .255-1.309 1.068 1.068 0 0 1 1.418.266l.052.07a7.704 7.704 0 0 1 1.298 5.783c-.742 4.205-4.786 6.69-9.065 5.99zm1.932-15.546l-.445-.955a.785.785 0 0 1 .376-1.034.785.785 0 0 1 1.034.376l1.375 2.949c.145.478-.026.947-.41 1.126l-2.948 1.375c-.257.12-.35.086-.539.017-.188-.067-.342-.23-.46-.487a.785.785 0 0 1 .375-1.034l.832-.398c-2.814.038-5.288 2.032-5.788 4.865a5.81 5.81 0 0 0 .434 3.423c.16.354.357.694.59 1.016a.818.818 0 0 1-.222 1.222l-.24.14a.899.899 0 0 1-1.167-.23 7.938 7.938 0 0 1-.776-1.332 7.754 7.754 0 0 1-.588-4.587c.715-4.057 4.472-6.828 8.567-6.452z"
+                                              fill="#42526E" fill-rule="evenodd"/>
+                                    </svg>
+                                </a>
+                            </th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for parser in parsers %}
+                            <tr class="custom-tr">
+                                <td scope="row"><span class='parser_id'>{{ parser.pk }}</span></td>
+                                <td>{{ parser.name }}</td>
+                                <td>{{ parser.address }}</td>
+                                <td><span class="country" id='{{ parser.pk }}_country'></span></td>
+                                <td><span class="city" id='{{ parser.pk }}_city'></span></td>
+                                <td><span class="city" id='{{ parser.pk }}_age'></span></td>
+                                <td><span class="processed_id" id='{{ parser.pk }}_procesedid'></span></td>
+                                <td><span class="processed_photo" id='{{ parser.pk }}_processphoto'></span></td>
+                                <td>
+                                    <button href="#" data-id="{{ parser.pk }}"
+                                            class="infoBTN uk-button uk-button-default custom-buttons"
+                                            data-toggle="modal" data-target="#infoFilterModal" value="{{ parser.pk }}">
+                                        <i uk-icon="info" aria-hidden="true"></i>
+                                        <span hidden id="parserId">{{ parser.pk }}</span>
+                                    </button>
+                                    {% if parser.is_active %}
+                                        <button href="#" data-id="{{ parser.pk }}" onclick="run('{{ parser.pk }}')"
+                                                class="playBTN uk-button uk-button-default custom-buttons" disabled>
+                                            <i uk-icon="play" aria-hidden="true"></i>
+                                        </button>
+                                    {% else %}
+                                        <button href="#" data-id="{{ parser.pk }}" onclick="run('{{ parser.pk }}')"
+                                                class="playBTN uk-button uk-button-default custom-buttons">
+                                            <i uk-icon="play" aria-hidden="true"></i>
+                                        </button>
+                                    {% endif %}
+                                    <button href="#" data-id="{{ parser.pk }}" onclick="pause('{{ parser.pk }}')"
+                                            class="pauseBTN uk-button uk-button-default custom-buttons2"
+                                            id='{{ parser.pk }}_IsPaused'>
+                                        <i class="fa fa-pause" aria-hidden="true"></i>
+                                        <span hidden id="settingsId">{{ parser.pk }}</span>
+                                    </button>
+                                    {% if parser.is_active %}
+                                        <button href="#" data-id="{{ parser.pk }}" onclick="stop('{{ parser.pk }}')"
+                                                class="stopBTN uk-button uk-button-default custom-buttons2">
+                                            <i class="fa fa-stop" aria-hidden="true"></i>
+                                        </button>
+                                    {% else %}
+                                        <button href="#" data-id="{{ parser.pk }}" onclick="stop('{{ parser.pk }}')"
+                                                class="stopBTN uk-button uk-button-default custom-buttons2" disabled>
+                                            <i class="fa fa-stop" aria-hidden="true"></i>
+                                        </button>
+                                    {% endif %}
+                                    <button href="#" data-id="{{ parser.pk }}"
+                                            class="settingBTN uk-button uk-button-default custom-buttons"
+                                            data-toggle="modal" data-target="#createFilterModal">
+                                        <i uk-icon="settings" aria-hidden="true"></i>
+                                        <span hidden id="settingsId">{{ parser.pk }}</span>
+                                    </button>
+                                </td>
+                                <td></td>
+                            </tr>
+                        {% endfor %}
+
+                        </tbody>
+                    </table>
+                    </div>
+                    <div class="modal fade" id="infoFilterModal" tabindex="-1" role="dialog"
+                         aria-labelledby="infoFilterModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="infoFilterModalLabel">Информация о ВК парсере</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <div>
+                                        <div class="form-group col-10">
+                                            <h5>
+                                                Параметры фильтров ВК парсера
+                                            </h5>
+                                        </div>
+                                        <div class="form-group col-6">
+                                            <p>Состояние: <span id="parserStatus"></span></p>
+                                            <p>Страна: <span id="parserCountry"></span></p>
+                                            <p>Город: <span id="parserCity"></span></p>
+                                            <p>Количество потоков: <span id="parserThread"></span></p>
+                                        </div>
+                                        <div class="form-group col-10">
+                                            <p class="font-weight-bold">Фильтры парсера</p>
+                                        </div>
+                                        <div class="form-group col-10">
+                                            <p>Пол: <span id="parserSex"></span></p>
+                                            <p>Возраст: <span id="parserAgeFrom"></span> - <span
+                                                    id="parserAgeTo"></span></p>
+                                            <p>Максимум фото со страницы: <span id="parserPhotoByPage"></span></p>
+                                            <p>файлов в пакете: <span id="parserFilesInPakage"></span></p>
+                                        </div>
+                                        <div class="form-group col-10">
+                                            <p class="font-weight-bold">Парсер обработал</p>
+                                            <p>Id: <span id="parserParsedId"></span></p>
+                                            <p>Фото: <span id="parserParsedPages"></span></p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <div class="m-auto">
+                                        <button type="button" class="uk-button uk-button-default" data-dismiss="modal">
+                                            Закрыть
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal fade" id="createFilterModal" tabindex="-1" role="dialog"
+                         aria-labelledby="createFilterModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="createFilterModalLabel">Создание фильтров ВК
+                                        парсера</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <div>
+                                        <div class="form-group">
+                                        <span>
+                                            Параметры фильтров ВК парсера
+                                        </span>
+                                        </div>
+                                        <div class="row">
+                                            <div class="form-group col-6">
+                                                <label for="Country">Страна</label>
+                                                <select id="Country" class="form-control" name="CountryId" required>
+                                                    <option selected disabled>Выбрать</option>
+                                                    {% for country in countrys %}
+                                                        <option value="{{ country.vk_id }}">{{ country.name }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+
+                                            <div class="form-group col-6">
+                                                <label for="City">Город</label>
+                                                <select id="City" class="form-control CityID" name="CityId" value=0
+                                                        aria-describedby="CityHelp" required>
+                                                    <option selected disabled>Выбрать</option>
+                                                    {% for city in cities %}
+                                                        <option value="{{ city.city_vk_id }}">{{ city.city_name }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                                <small id="CityHelp" class="form-text text-muted">(необязательное
+                                                    поле)</small>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="form-group col-6">
+                                                <label for="Sex">Минимальный возраст:</label>
+                                                <input type="number" min=16 class="form-control" id="MinAge"
+                                                       aria-describedby="MinAgeHelp" required>
+                                                <small id="MinAgeHelp" class="form-text text-muted">Минимальный возраст
+                                                    профилей.</small>
+                                            </div>
+                                            <div class="form-group col-6">
+                                                <label for="Thread">Максимальный возраст:</label>
+                                                <input type="number" min=16 max=150 class="form-control" id="MaxAge"
+                                                       aria-describedby="MaxAgeHelp" required>
+                                                <small id="MaxAgeHelp" class="form-text text-muted">Максимальный возраст
+                                                    профилей.</small>
+                                                <small id="MaxAgeError" class="form-text text-muted"></small>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="form-group col-6">
+                                                <label for="Sex">Выберите пол:</label>
+                                                <select id="Sex" class="form-control" required>
+                                                    <option selected disabled>Выбрать</option>
+                                                    <option value="2">Мужчины</option>
+                                                    <option value="1">Женщины</option>
+                                                    <option value="0">Любые</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group col-6">
+                                                <label for="Thread">Количество потоков</label>
+                                                <input type="number" min=0 class="form-control" id="Thread"
+                                                       aria-describedby="ThreadHelp" required>
+                                                <small id="ThreadHelp" class="form-text text-muted">Количество потоков
+                                                    должно быть в диапазоне от 1 до 500.</small>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="form-group col-6">
+                                                <label for="Photo">Максимум фото со страницы</label>
+                                                <input type="number" min=0 class="form-control" id="Photo"
+                                                       aria-describedby="PhotoHelp" required>
+                                                <small id="PhotoHelp" class="form-text text-muted">Количество фото
+                                                    должно
+                                                    быть в диапазоне от 1 до 10.</small>
+                                            </div>
+                                            <div class="form-group col-6">
+                                                <label for="Folder">Максимум папок в пакете</label>
+                                                <input type="number" min=0 class="form-control" id="Folder"
+                                                       aria-describedby="FolderHelp" required>
+                                                <small id="FolderHelp" class="form-text text-muted">Количество папок
+                                                    должно
+                                                    быть в диапазоне от 1 до 500.</small>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="form-group col-6">
+                                                <label for="PackAmount">Максимум пакетов</label>
+                                                <input type="number" min=0 class="form-control" id="PackAmount"
+                                                       aria-describedby="PackAmountHelp" required>
+                                                <small id="PackAmountHelp" class="form-text text-muted">(необязательное
+                                                    поле)</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="modal-footer">
+                                    <button type="button" class="uk-button uk-button-default" data-dismiss="modal">
+                                        Закрыть
+                                    </button>
+                                    <button type="submit" class="uk-button uk-button-primary settingApplyBTN">Применить
+                                        фильтры
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal fade" id="createParserModal" tabindex="-1" role="dialog"
+                         aria-labelledby="createParserModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-sm" style="width: 350px">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="createParserModalLabel">Создание ВК парсера</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <div>
+                                        <div class="col-12">
+                                            <div class="form-group">
+                                            <span class="font-weight-bold">
+                                                Параметры ВК парсера
+                                            </span>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="Address">Название парсера</label>
+                                                <input type="text" class="form-control" id="CreateName"
+                                                       aria-describedby="NameHelp" required>
+                                                <small id="NameHelp" class="form-text text-muted">Отображаемое в
+                                                    статусе.</small>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="Address">Адрес</label>
+                                                <input type="text" class="form-control" id="Address"
+                                                       aria-describedby="AddressHelp" required>
+                                                <small id="AddressHelp" class="form-text text-muted">IP адрес сервера
+                                                    (без
+                                                    порта).</small>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="Login">Логин</label>
+                                                <input type="text" class="form-control" id="Login"
+                                                       aria-describedby="LoginHelp" required>
+                                                <small id="LoginHelp" class="form-text text-muted">Логин от виртуально
+                                                    выделенного сервера.</small>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="Password">Пароль</label>
+                                                <input type="text" class="form-control" id="Password"
+                                                       aria-describedby="PasswordHelp" required>
+                                                <small id="PasswordHelp" class="form-text text-muted">Пароль от
+                                                    виртуально
+                                                    выделенного сервера.</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <div class="m-auto">
+                                            <button type="button" class="uk-button uk-button-default"
+                                                    data-dismiss="modal">Закрыть
+                                            </button>
+                                            <button type="submit" class="uk-button uk-button-primary createApplyBTN">
+                                                Создать
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endblock main_content %}
+        </form>
+    </main>
+</div>
+{% block side_script %}
+    <script src="{% static "jquery/dist/jquery.js" %}"></script>
+    <script>
+        $('#reloadBTN').on("click", function () {
+            $('#animation').addClass("custom-animate");
+            $('#reloadBTN').on('click', function () {
+                for (let i of document.getElementsByClassName('parser_id')) {
+                    console.log(i.innerText);
+                    get_parser_status(i.innerText);
+                }
+            });
+            setTimeout(() => {
+                $('#animation').removeClass("custom-animate");
+            }, 1000);
+        });
+    </script>
+    <script>
+        $('#proxyTypeSelect').on('change', function () {
+            var proxyTypeSelect = $('#proxyTypeSelect').val();
+            var proxyShow = document.getElementById('proxyTypeSock');
+            if (proxyTypeSelect == 'socks') {
+                proxyShow.style.display = "block";
+            } else if (proxyTypeSelect == 'http') {
+                var golo = $('#LoginProxy').val();
+                $('#LoginProxy').val('');
+                $('#PasswordProxy').val('');
+                proxyShow.style.display = "none";
+            }
+        })
+        $('.addProxyBTN').on('click', function () {
+            var proxyType = $('#proxyTypeSelect').val();
+            var proxyIp = $('#IpPort').val();
+            var proxyLogin = $('#LoginProxy').val();
+            var proxyPass = $('#PasswordProxy').val();
+            $.ajax({
+                url: '/vk/create_proxy/',
+                method: 'POST',
+                data: {
+                    proxyType: proxyType,
+                    proxyIp: proxyIp,
+                    proxyLogin: proxyLogin,
+                    proxyPass: proxyPass
+                },
+                success: function (result) {
+                    if (result.success) {
+                        Swal.fire({
+                            title: 'Успешно!',
+                            text: result.message,
+                            icon: 'success',
+                            timer: 3000,
+                            showConfirmButton: true
+                        }).then(() => {
+                            window.location.href = '';
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Ошибка!',
+                            text: result.message,
+                            icon: 'error',
+                            timer: 4000,
+                            showConfirmButton: true
+                        });
+                    }
+                }
+            })
+        })
+
+    </script>
+    <script>
+        var parser_settings_id;
+
+
+        function get_parser_status(id_) {
+            $.ajax({
+                url: '/vk/parser_status/',
+                method: 'GET',
+                data: {
+                    'parsers_id': id_
+                },
+                success: function (data) {
+                    console.log(data);
+                    if (data.status == 'success') {
+                        $('#' + id_ + '_country').text(data.parserCountry);
+                        $('#' + id_ + '_city').text(data.parserCity);
+                        $('#' + id_ + '_age').text(data.parserAgeFrom + '-' + data.parserAgeTo);
+                        $('#' + id_ + '_procesedid').text(data.parserParsedId);
+                        $('#' + id_ + '_processphoto').text(data.parserParsedPhotos);
+                        if (data.isPaused == false) {
+                            $('#' + id_ + '_IsPaused').removeClass("btn-warning").addClass('btn-outline-warning');
+                        } else if (data.isPaused == true) {
+                            $('#' + id_ + '_IsPaused').removeClass("btn-outline-warning").addClass('btn-warning');
+                        }
+                    } else {
+                        $('#' + id_ + '_country').text('');
+                        $('#' + id_ + '_city').text('');
+                        $('#' + id_ + '_age').text('');
+                        $('#' + id_ + '_procesedid').text('');
+                        $('#' + id_ + '_processphoto').text('');
+                    }
+
+                }
+            });
+        }
+
+        $('.infoBTN').on('click', function () {
+
+            var childElem = this.children[1];
+            var parserID = childElem.innerHTML;
+
+            $.ajax({
+                url: '/vk/parser_status/',
+                method: 'GET',
+                data: {
+                    'parsers_id': parserID
+                },
+                success: function (data) {
+                    console.log(data);
+                    if (data.status == 'success') {
+                        console.log(data.status);
+                        $('#parserStatus').text(data.parserStatus);
+                        $('#parserCountry').text(data.parserCountry);
+                        $('#parserCity').text(data.parserCity);
+                        $('#parserThread').text(data.parserThread);
+                        $('#parserSex').text(data.parserSex);
+                        $('#parserAgeFrom').text(data.parserAgeFrom);
+                        $('#parserAgeTo').text(data.parserAgeTo);
+                        $('#parserPhotoByPage').text(data.parserPhotoByPage);
+                        $('#parserFilesInPakage').text(data.parserFilesInPakage);
+                        $('#parserParsedId').text(data.parserParsedId);
+                        $('#parserParsedPages').text(data.parserParsedPhotos);
+
+                    } else {
+                        $('.modal-dialog').hide();
+
+                        Swal.fire({
+                            title: 'Фильтр парсера не установлен',
+                            text: '',
+                            icon: 'error',
+                            timer: 4000,
+                            showConfirmButton: true
+                        }).then(() => {
+                            window.location.href = '';
+                        });
+                    }
+                }
+            });
+        });
+
+        var cityInput = $('#City');
+
+        $(document).ready(function () {
+
+            $('#Country').change(function () {
+                node = document.getElementById('City');
+                while (node.firstChild) {
+                    node.removeChild(node.firstChild);
+
+                }
+                let self = $(this);
+                $.ajax({
+                    url: '',
+                    method: 'POST',
+                    data: {
+                        'csrfmiddlewaretoken': '{{ csrf_token }}',
+                        'country_id': self.val()
+                    },
+                    success: function (result) {
+                        let option = $('<option />', {val: 'Выбрать', text: 'Выбрать', class: 'city_option'});
+                        cityInput.append(option);
+                        for (let city of result) {
+                            console.log(city);
+                            let option = $('<option />', {
+                                val: city.city_vk_id,
+                                text: city.city_name,
+                                class: 'city_option'
+                            });
+                            cityInput.append(option);
+                        }
+
+                    }
+                })
+            })
+
+            for (let i of document.getElementsByClassName('parser_id')) {
+                try {
+                    get_parser_status(i.innerText);
+                } catch (error) {
+                    continue;
+                }
+            }
+        })
+
+        function run(parsers_id) {
+            console.log(parsers_id);
+            $.ajax({
+                url: '/vk/action_parser/',
+                method: 'POST',
+                data: {
+                    'csrfmiddlewaretoken': '{{ csrf_token }}',
+                    'parsers_id': parsers_id,
+                    'action': 'run'
+                },
+                success: function (result) {
+                    console.log('run');
+                }
+            })
+        }
+
+
+        function pause(parsers_id) {
+
+
+            $.ajax({
+                url: '/vk/pause_status/',
+                method: 'GET',
+                data: {
+                    'csrfmiddlewaretoken': '{{ csrf_token }}',
+                    'parsers_id': parsers_id
+                },
+                success: function (result) {
+                    console.log(result);
+                    set_status(result['status_pause'], parsers_id);
+
+                }
+            })
+
+
+        }
+
+        function set_status(pause_status, parsers_id) {
+            if (pause_status == 'parser not active') {
+                console.log('Parser is not active');
+                Swal.fire({
+                    title: 'Парсер не активен',
+                    // text: 'Парсер не активен',
+                    icon: 'error',
+                    timer: 3000,
+                    showConfirmButton: true
+                })
+            } else if (pause_status) {
+                $.ajax({
+                    url: '/vk/action_parser/',
+                    method: 'POST',
+                    data: {
+                        'csrfmiddlewaretoken': '{{ csrf_token }}',
+                        'parsers_id': parsers_id,
+                        'action': 'unpause'
+                    },
+                    success: function (result) {
+                        console.log('unpause');
+                        location.href = '';
+                    }
+                })
+            } else {
+                $.ajax({
+                    url: '/vk/action_parser/',
+                    method: 'POST',
+                    data: {
+                        'csrfmiddlewaretoken': '{{ csrf_token }}',
+                        'parsers_id': parsers_id,
+                        'action': 'pause'
+                    },
+                    success: function (result) {
+                        console.log('pause');
+                        location.href = '';
+                    }
+                })
+            }
+
+        }
+
+        function stop(parsers_id) {
+            $.ajax({
+                url: '/vk/action_parser/',
+                method: 'POST',
+                data: {
+                    'csrfmiddlewaretoken': '{{ csrf_token }}',
+                    'parsers_id': parsers_id,
+                    'action': 'stop'
+                },
+                success: function (result) {
+                    console.log('stop');
+                    location.href = '';
+                }
+            })
+        }
+
+        $('.settingBTN').on('click', function () {
+            let childElem = this.children[1];
+            let parserID = childElem.innerHTML;
+            parser_settings_id = parserID;
+        })
+
+
+        $('.settingApplyBTN').on('click', function () {
+
+            let token = $(this).attr('data-token');
+            let country = $('#Country').val();
+            let city = $('#City').val();
+            let sex = $('#Sex').val();
+            let photo = $('#Photo').val();
+            let thread = $('#Thread').val();
+            let folder = $('#Folder').val();
+            let minage = $('#MinAge').val();
+            let maxage = $('#MaxAge').val();
+            let PackAmount = $('#PackAmount').val();
+
+
+            console.log(parser_settings_id);
+
+            if (minage > maxage) {
+                document.getElementById("MaxAgeError").innerHTML = "Ошибка возраста"
+            } else {
+                document.getElementById("MaxAgeError").innerHTML = '';
+                if (minage < 16) {
+                    $('#MinAge').val(16);
+                    minage = 16;
+                }
+
+                if (maxage < 16) {
+                    $('#MaxAge').val(16);
+                    maxage = 16;
+                }
+
+
+                $.ajax({
+                    url: '/vk/set_filter_settings/',
+                    method: 'GET',
+                    contentType: 'application/json; charset=utf-8',
+                    dataType: 'json',
+                    data: {
+                        'ID': parser_settings_id,
+                        'Country': country,
+                        'City': city,
+                        'Sex': sex,
+                        'Photo': photo,
+                        'Thread': thread,
+                        'Folder': folder,
+                        'MinAge': minage,
+                        'MaxAge': maxage,
+                        'PackAmount': PackAmount
+                    },
+                    success: function (result) {
+                        //debugger;
+                        if (result.success) {
+                            Swal.fire({
+                                title: 'Успешно!',
+                                text: result.message,
+                                icon: 'success',
+                                timer: 3000,
+                                showConfirmButton: true
+                            }).then(() => {
+                                // window.location.href = '';
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'Ошибка',
+                                text: result.message,
+                                icon: 'error',
+                                timer: 4000,
+                                showConfirmButton: true
+                            });
+                        }
+                    }
+                })
+            }
+        })
+    </script>
+    <script>
+        $('.createApplyBTN').on('click', function () {
+            let address = $('#Address').val();
+            let login = $('#Login').val();
+            let password = $('#Password').val();
+            let name = $('#CreateName').val();
+            $.ajax({
+                url: '/vk/create_parser/',
+                method: 'POST',
+                data: {
+                    'csrfmiddlewaretoken': '{{ csrf_token }}',
+                    'Ip': address,
+                    'Login': login,
+                    'Password': password,
+                    'Name': name
+                },
+                success: function (result) {
+                    if (result.success) {
+                        Swal.fire({
+                            title: 'Успешно!',
+                            text: result.message,
+                            icon: 'success',
+                            timer: 2000,
+                            showConfirmButton: true
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Ошибка!',
+                            text: result.message,
+                            icon: 'error',
+                            timer: 3000,
+                            showConfirmButton: true
+                        });
+                    }
+                }
+            })
+        })
+    </script>
+{% endblock side_script %}

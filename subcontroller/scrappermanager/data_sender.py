@@ -18,14 +18,12 @@ class DataSender:
         self.neuro_url = NEURO_URL
 
     def send_data(self, url: str, data: dict):
-        try:
-            while True:
-                response = requests.get(self.neuro_url)
-                if response.status_code != 200:
-                    ic('Failed to get status:-> ', response.status_code)
-                    time.sleep(5)
-                else:
-                    break
+        response = 500
+        while response != 200:
+            response = requests.get(self.neuro_url)
+            if response.status_code != 200:
+                ic('Failed to get status:-> ', response.status_code)
+                time.sleep(5)
 
         try:
             response = requests.post(self.neuro_url, params=data)
