@@ -3,7 +3,7 @@ from django.http import HttpResponse
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import redirect
 from django.shortcuts import render, get_object_or_404
-from .models import Scrapper, Vacancy, City
+from .models import Scrapper, Vacancy, City, WorkCategory
 from rest_framework.decorators import api_view
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -30,7 +30,7 @@ def send_empty_put_request(address, action, collector_type):
 
 def home(requеst):
     context = {
-        'vacancys': Vacancy.objects.all(),
+        'vacancys': WorkCategory.objects.all(),
         'scrappers': Scrapper.objects.all(),
         'cities': City.objects.all(),
     }
@@ -96,25 +96,21 @@ class GetStatusParser(APIView):
             address_parser = Scrapper.objects.get(pk=request.GET['parsers_id'])
             response = get_status_response(address_parser.address)
             parserStatus = 'Активен' if response['vacancyCollectorStatus']['is active'] == True else 'Выключен' 
-            parserCity = response['vacancyCollectorStatus']['filter']['city_id']
+            parserCity = response['vacancyCollectorStatus']['filter']['city_name']
             parserWebsite = response['vacancyCollectorStatus']['filter']['website']
             parserThread = response['vacancyCollectorStatus']['settings']['number of threads']
             parserStageFrom = response['vacancyCollectorStatus']['filter']['stage_from']
             parserStageTo = response['vacancyCollectorStatus']['filter']['stage_to']
+            vacancysInPack = response['vacancyCollectorStatus']['filter']['vacancys in pack']
             parserParsedVacancys = response['vacancyCollectorStatus']['collected vacancys']
-            vacancysInPack = response['vacancyCollectorStatus']['vacancys in pack']
             pausedStatus = response['vacancyCollectorStatus']['is paused']
             activeStatus = response['vacancyCollectorStatus']['is active']
             parserVacancy = response['vacancyCollectorStatus']['vacancy']
             ic(response['vacancyCollectorStatus'])
             if isinstance(parserCity, list):
-                if len(parserCity) == 1:
-                    parserCity = City.objects.get(city_id=parserCity).city_name
-                else:
+                if len(parserCity) != 1:
                     for city in parserCity:
                         parserCity = ''
-            else:
-                parserCity = City.objects.get(city_id=parserCity).city_name
             data = {
                     'isActive': activeStatus,
                     'parserStatus': parserStatus,

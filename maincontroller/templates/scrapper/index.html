@@ -175,7 +175,7 @@
                                                 <select id="Vacancy" class="form-control" name="VacansyId" required>
                                                     <option value="*" selected disabled>Выбрать все</option>
                                                     {% for Vacancy in vacancys %}
-                                                        <option value="{{ Vacancy.vacancy_id }}">{{ Vacancy.vacancy_name }}</option>
+                                                        <option value="{{ Vacancy.work_category_id }}">{{ Vacancy.category_name }}</option>
                                                     {% endfor %}
                                                 </select>
                                             </div>
@@ -198,15 +198,14 @@
                                                 <label for="MinStag">Минимальный стаж:</label>
                                                 <input type="number" min=1 class="form-control" id="MinStage"
                                                        aria-describedby="MinStageHelp" required>
-                                                <small id="MinStageHelp" class="form-text text-muted">Минимальный возраст
-                                                    профилей.</small>
+                                                <small id="MinStageHelp" class="form-text text-muted">Минимальный стаж вакансий.</small>
                                             </div>
                                             <div class="form-group col-6">
                                                 <label for="Thread">Максимальный стаж:</label>
                                                 <input type="number" min=5 max=150 class="form-control" id="MaxStage"
                                                        aria-describedby="MaxStageHelp" required>
-                                                <small id="MaxStageHelp" class="form-text text-muted">Максимальный возраст
-                                                    профилей.</small>
+                                                <small id="MaxStageHelp" class="form-text text-muted">Максимальный стаж
+                                                    вакансии.</small>
                                                 <small id="MaxStageError" class="form-text text-muted"></small>
                                             </div>
                                         </div>
