@@ -3,7 +3,7 @@ from django.http import HttpResponse
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import redirect
 from django.shortcuts import render, get_object_or_404
-from .models import Scrapper, Vacancy
+from .models import Scrapper, Vacancy, City
 from rest_framework.decorators import api_view
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -30,8 +30,9 @@ def send_empty_put_request(address, action, collector_type):
 
 def home(requеst):
     context = {
-        'vacansys': Vacancy.objects.all(),
-        'scrappers': Scrapper.objects.all()
+        'vacancys': Vacancy.objects.all(),
+        'scrappers': Scrapper.objects.all(),
+        'cities': City.objects.all(),
     }
     return render(requеst, 'scrapper/index.html', context=context)
 
@@ -41,16 +42,15 @@ class GetPauseStatus(APIView):
         id_parser = request.GET['parsers_id']
         address = Scrapper.objects.get(pk=id_parser).address
         response = get_status_response(address)
-        idsActive = response['idsCollectorStatus']['is active']
+        idsActive = response['vacancyCollectorStatus']['is active']
         if not idsActive:
             data = {'status_pause': 'parser not active'}
             return Response(data)
-        idsPaused = response['idsCollectorStatus']['is paused']
-        photoPaused = response['photosCollectorStatus']['is paused']
+        vacancysPaused = response['vacancyCollectorStatus']['is paused']
         ic(f'\n------PAUSED {id_parser}---------')
-        ic(idsPaused, photoPaused)
+        ic(vacancysPaused)
         ic('--------------------\n')
-        if idsPaused:
+        if vacancysPaused:
             data = {'status_pause': True}
         else:
             data = {'status_pause': False}
@@ -93,13 +93,42 @@ def create_parser(request):
 class GetStatusParser(APIView):
     def get(self, request):
         try:
-            address_parser = Scrapper.objects.get(id=request.GET['parsers_id'])
+            address_parser = Scrapper.objects.get(pk=request.GET['parsers_id'])
             response = get_status_response(address_parser.address)
-            
+            parserStatus = 'Активен' if response['vacancyCollectorStatus']['is active'] == True else 'Выключен' 
+            parserCity = response['vacancyCollectorStatus']['filter']['city_id']
+            parserWebsite = response['vacancyCollectorStatus']['filter']['website']
+            parserThread = response['vacancyCollectorStatus']['settings']['number of threads']
+            parserStageFrom = response['vacancyCollectorStatus']['filter']['stage_from']
+            parserStageTo = response['vacancyCollectorStatus']['filter']['stage_to']
+            parserParsedVacancys = response['vacancyCollectorStatus']['collected vacancys']
+            vacancysInPack = response['vacancyCollectorStatus']['vacancys in pack']
+            pausedStatus = response['vacancyCollectorStatus']['is paused']
+            activeStatus = response['vacancyCollectorStatus']['is active']
+            parserVacancy = response['vacancyCollectorStatus']['vacancy']
             ic(response['vacancyCollectorStatus'])
+            if isinstance(parserCity, list):
+                if len(parserCity) == 1:
+                    parserCity = City.objects.get(city_id=parserCity).city_name
+                else:
+                    for city in parserCity:
+                        parserCity = ''
+            else:
+                parserCity = City.objects.get(city_id=parserCity).city_name
             data = {
-                    'status' : response['vacancyCollectorStatus']
-            }
+                    'isActive': activeStatus,
+                    'parserStatus': parserStatus,
+                    'isPaused': pausedStatus,
+                    'parserWebsite': parserWebsite,
+                    'parserCity': parserCity,
+                    'parserThread': parserThread,
+                    'parserStageFrom': parserStageFrom,
+                    'parserStageTo': parserStageTo,
+                    'parserParsedVacancys': parserParsedVacancys,
+                    'vacancysInPack': vacancysInPack,
+                    'parserVacancy': parserVacancy,
+                    'status' : 'success'
+                }
         except Exception as e:
             ic(e)
             
@@ -108,3 +137,114 @@ class GetStatusParser(APIView):
             }
         return Response(data)   
 
+class SetSettingsFiltersParser(APIView):
+    def get(self, request):
+        vacansy = request.GET['Vacansy']
+        city = request.GET['City']
+        website = request.GET['Website']
+        thread_amount = request.GET['Thread']
+        minStage = request.GET['MinStage']
+        maxStage = request.GET['MaxStage']
+        amount_vacancy_in_pack = request.GET['Folder']
+        id_parser = request.GET['ID']
+        pack_amount = request.GET['PackAmount']
+        print(f'\n got values\n \t{request.GET} \n')
+        print(f'Parser id->{id_parser}')
+
+        ip_port = Scrapper.objects.get(pk=id_parser).address
+        
+        url = f"http://{ip_port}/Vacancys/set_settings/"
+        if pack_amount != '':
+            data = {
+                "vacancys in pack" : amount_vacancy_in_pack,
+                "number of threads" : thread_amount,
+                "pack amount" : pack_amount,
+            }
+        else:
+            data = {
+                "vacancys in pack" : amount_vacancy_in_pack,
+                "number of threads" : thread_amount,
+            }        
+        print(f"Set settings {data}")
+
+        if city == '':
+            city = list(City.objects.all().values())
+        else:
+            city = [city]
+        try:
+            response = requests.request("PUT", url, data = data)
+            print(response.status_code)
+        except Exception:
+            return HttpResponse(content={
+                'success': False,
+                'message': 'Ошибка установки настроек'
+                })
+            
+        url = f"http://{ip_port}/Vacancys/set_filter/"
+        data = {
+            "vacansy": vacansy,
+            "stage_to" : maxStage,
+            "stage_from" : minStage,
+            "website" : website,
+            "city_id" : city
+        }
+    
+        print(f"Set ids filter {data}\n\t{url}")
+
+        try:
+            response = requests.request("PUT", url, data = data)
+            print(response.status_code)
+        except Exception:
+            return HttpResponse(content={
+                    'success': False,
+                    'message': 'Ошибка установки фильтров id парсера'
+                })
+
+        return Response({
+                'success': True,
+                'message': 'Фильтр настроен и перезапущен'
+            })
+
+class ParserAction(APIView):
+    def post(self, request):
+        id_parser = request.POST['parsers_id']
+        print(id_parser)
+        address = Scrapper.objects.get(pk=id_parser).address
+        response = get_status_response(address)
+        print(response)
+        IdStatus = response['vacancyCollectorStatus']
+        PhotoStatus = response['vacancyCollectorStatus']
+        print(request.POST)
+            
+        if 'run' == request.POST['action']:
+            print('\n RUN PARSERS\n')
+            if not IdStatus['is active']:
+                Scrapper.objects.filter(pk=id_parser).update(is_active=True)
+                response = send_empty_put_request(address, 'run', 'Ids') 
+            if not PhotoStatus['is active']:
+                Scrapper.objects.filter(pk=id_parser).update(is_active=True)
+                response = send_empty_put_request(address, 'run', 'Photos')
+            
+        if 'pause' == request.POST['action']:
+            print('\n PAUSE PARSERS\n')
+            if not IdStatus['is paused']:
+                response = send_empty_put_request(address, 'pause', 'Ids')
+            if not PhotoStatus['is paused']:
+                response = send_empty_put_request(address, 'pause', 'Photos')
+            
+        if 'unpause' == request.POST['action']:
+            print('\n UNPAUSE PARSERS\n')
+            if IdStatus['is paused']:
+                response = send_empty_put_request(address, 'unpause', 'Ids')
+            if  PhotoStatus['is paused']:
+                response = send_empty_put_request(address, 'unpause', 'Photos')
+            
+        if 'stop' == request.POST['action']:
+            print('\n STOP PARSERS\n')
+            if IdStatus['is active']:
+                Scrapper.objects.filter(pk=id_parser).update(is_active=False)
+                response = send_empty_put_request(address, 'stop', 'Ids')
+            if PhotoStatus['is active']:
+                Scrapper.objects.filter(pk=id_parser).update(is_active=False)
+                response = send_empty_put_request(address, 'stop', 'Photos')
+        return Response({'status' : 'success'})

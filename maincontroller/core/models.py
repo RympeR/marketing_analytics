@@ -18,6 +18,9 @@ class Client(models.Model):
     class Meta:
         managed = False
         db_table = 'client'
+        verbose_name = 'Клиент'
+        verbose_name_plural = 'Клиенты'
+
 
     def __str__(self):
         return self.login
@@ -31,6 +34,8 @@ class ClientWork(models.Model):
     class Meta:
         managed = False
         db_table = 'client_work'
+        verbose_name = 'Клиент - работа'
+        verbose_name_plural = 'Клиенты - работы'
 
     def __str__(self):
         return self.client + ' -- ' + self.work_category
@@ -42,6 +47,8 @@ class ClientWorkPreferences(models.Model):
     class Meta:
         managed = False
         db_table = 'client_work_preferences'
+        verbose_name = 'Избранные категории клиента'
+        verbose_name_plural = 'Избранные категории клиентов'
 
     def __str__(self):
         return self.client + ' -- ' + self.work_category
@@ -57,6 +64,8 @@ class Scrapper(models.Model):
     class Meta:
         managed = False
         db_table = 'scrapper'
+        verbose_name = 'Парсер'
+        verbose_name_plural = 'Парсеры'
 
     def __str__(self):
         return self.address + ' -- ' + self.login
@@ -89,3 +98,8 @@ class WorkCategory(models.Model):
 
     def __str__(self):
         return self.category_name
+
+class City(models.Model):
+    city_id = models.AutoField(verbose_name='Айди города', primary_key=True)
+    city_name = models.TextField(verbose_name='Город')
+    

@@ -16,9 +16,10 @@
                             <th scope="col">#</th>
                             <th scope="col">Парсер</th>
                             <th scope="col">Адрес</th>
-                            <th scope="col">Страна</th>
                             <th scope="col">Город</th>
-                            <th scope="col">Возраст</th>
+                            <th scope="col">Рабочий стаж</th>
+                            <th scope="col">Веб сайт</th>
+                            <th scope="col">Вакансия</th>
                             <th scope="col">Обработано вакансий</th>
                             <th scope="col">Действие</th>
                             <th scope="col" style="padding: 0; margin-top: -5px" class="custom-hover">
@@ -33,16 +34,17 @@
                         </tr>
                         </thead>
                         <tbody>
-                        {% for parser in parsers %}
+                        {% for parser in scrappers %}
                             <tr class="custom-tr">
                                 <td scope="row"><span class='parser_id'>{{ parser.pk }}</span></td>
                                 <td>{{ parser.name }}</td>
                                 <td>{{ parser.address }}</td>
-                                <td><span class="country" id='{{ parser.pk }}_country'></span></td>
                                 <td><span class="city" id='{{ parser.pk }}_city'></span></td>
-                                <td><span class="city" id='{{ parser.pk }}_age'></span></td>
-                                <td><span class="processed_id" id='{{ parser.pk }}_procesedid'></span></td>
-                                <td><span class="processed_photo" id='{{ parser.pk }}_processphoto'></span></td>
+                                <td><span class="city" id='{{ parser.pk }}_stage'></span></td>
+                                <td><span class="Vacancy" id='{{ parser.pk }}_website'></span></td>
+                                <td><span class="processed_id" id='{{ parser.pk }}_vacancy'></span></td>
+                                <td><span class="processed_id" id='{{ parser.pk }}_procesvacancy'></span></td>
+                                
                                 <td>
                                     <button href="#" data-id="{{ parser.pk }}"
                                             class="infoBTN uk-button uk-button-default custom-buttons"
@@ -97,7 +99,7 @@
                         <div class="modal-dialog">
                             <div class="modal-content">
                                 <div class="modal-header">
-                                    <h5 class="modal-title" id="infoFilterModalLabel">Информация о ВК парсере</h5>
+                                    <h5 class="modal-title" id="infoFilterModalLabel">Информация о {{ parser.website_name }} парсере</h5>
                                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                         <span aria-hidden="true">&times;</span>
                                     </button>
@@ -106,12 +108,11 @@
                                     <div>
                                         <div class="form-group col-10">
                                             <h5>
-                                                Параметры фильтров ВК парсера
+                                                Параметры фильтров {{ parser.website_name }} парсера
                                             </h5>
                                         </div>
                                         <div class="form-group col-6">
                                             <p>Состояние: <span id="parserStatus"></span></p>
-                                            <p>Страна: <span id="parserCountry"></span></p>
                                             <p>Город: <span id="parserCity"></span></p>
                                             <p>Количество потоков: <span id="parserThread"></span></p>
                                         </div>
@@ -119,16 +120,15 @@
                                             <p class="font-weight-bold">Фильтры парсера</p>
                                         </div>
                                         <div class="form-group col-10">
-                                            <p>Пол: <span id="parserSex"></span></p>
-                                            <p>Возраст: <span id="parserAgeFrom"></span> - <span
-                                                    id="parserAgeTo"></span></p>
-                                            <p>Максимум фото со страницы: <span id="parserPhotoByPage"></span></p>
-                                            <p>файлов в пакете: <span id="parserFilesInPakage"></span></p>
+                                            <p>Вебсайт: <span id="parserWebsite"></span></p>
+                                            <p>Рабочий стаж: <span id="parserStageFrom"></span> - <span
+                                                    id="parserStageTo"></span></p>
+                                            <p>Вакансий в пакете: <span id="parserFilesInPakage"></span></p>
+                                            <p>Всего пакетов: <span id="parserPakages"></span></p>
                                         </div>
                                         <div class="form-group col-10">
                                             <p class="font-weight-bold">Парсер обработал</p>
-                                            <p>Id: <span id="parserParsedId"></span></p>
-                                            <p>Фото: <span id="parserParsedPages"></span></p>
+                                            <p>Вакансии: <span id="parserParsedVacancy"></span></p>
                                         </div>
                                     </div>
                                 </div>
@@ -161,16 +161,24 @@
                                         </span>
                                         </div>
                                         <div class="row">
-                                            <div class="form-group col-6">
-                                                <label for="Country">Страна</label>
-                                                <select id="Country" class="form-control" name="CountryId" required>
+                                            <!-- <div class="form-group col-6">
+                                                <label for="Vacancy">Страна</label>
+                                                <select id="Vacancy" class="form-control" name="VacansyId" required>
                                                     <option selected disabled>Выбрать</option>
-                                                    {% for country in countrys %}
-                                                        <option value="{{ country.vk_id }}">{{ country.name }}</option>
+                                                    {% for Vacancy in Vacansys %}
+                                                        <option value="{{ Vacancy.vk_id }}">{{ Vacancy.name }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div> -->
+                                            <div class="form-group col-6">
+                                                <label for="Vacancy">Вакансия</label>
+                                                <select id="Vacancy" class="form-control" name="VacansyId" required>
+                                                    <option value="*" selected disabled>Выбрать все</option>
+                                                    {% for Vacancy in vacancys %}
+                                                        <option value="{{ Vacancy.vacancy_id }}">{{ Vacancy.vacancy_name }}</option>
                                                     {% endfor %}
                                                 </select>
                                             </div>
-
                                             <div class="form-group col-6">
                                                 <label for="City">Город</label>
                                                 <select id="City" class="form-control CityID" name="CityId" value=0
@@ -184,31 +192,33 @@
                                                     поле)</small>
                                             </div>
                                         </div>
+
                                         <div class="row">
                                             <div class="form-group col-6">
-                                                <label for="Sex">Минимальный возраст:</label>
-                                                <input type="number" min=16 class="form-control" id="MinAge"
-                                                       aria-describedby="MinAgeHelp" required>
-                                                <small id="MinAgeHelp" class="form-text text-muted">Минимальный возраст
+                                                <label for="MinStag">Минимальный стаж:</label>
+                                                <input type="number" min=1 class="form-control" id="MinStage"
+                                                       aria-describedby="MinStageHelp" required>
+                                                <small id="MinStageHelp" class="form-text text-muted">Минимальный возраст
                                                     профилей.</small>
                                             </div>
                                             <div class="form-group col-6">
-                                                <label for="Thread">Максимальный возраст:</label>
-                                                <input type="number" min=16 max=150 class="form-control" id="MaxAge"
-                                                       aria-describedby="MaxAgeHelp" required>
-                                                <small id="MaxAgeHelp" class="form-text text-muted">Максимальный возраст
+                                                <label for="Thread">Максимальный стаж:</label>
+                                                <input type="number" min=5 max=150 class="form-control" id="MaxStage"
+                                                       aria-describedby="MaxStageHelp" required>
+                                                <small id="MaxStageHelp" class="form-text text-muted">Максимальный возраст
                                                     профилей.</small>
-                                                <small id="MaxAgeError" class="form-text text-muted"></small>
+                                                <small id="MaxStageError" class="form-text text-muted"></small>
                                             </div>
                                         </div>
                                         <div class="row">
                                             <div class="form-group col-6">
-                                                <label for="Sex">Выберите пол:</label>
-                                                <select id="Sex" class="form-control" required>
+                                                <label for="website">Выберите веб-сайт:</label>
+                                                <select id="website" class="form-control" required>
                                                     <option selected disabled>Выбрать</option>
-                                                    <option value="2">Мужчины</option>
-                                                    <option value="1">Женщины</option>
-                                                    <option value="0">Любые</option>
+                                                    <option value="work.ua">work.ua</option>
+                                                    <option value="rabota.ua">rabota.ua</option>
+                                                    <option value="dou.ua">dou.ua</option>
+                                                    <option value="hh.ua">hh.ua</option>
                                                 </select>
                                             </div>
                                             <div class="form-group col-6">
@@ -220,25 +230,17 @@
                                             </div>
                                         </div>
 
+                                            
+                                            
                                         <div class="row">
-                                            <div class="form-group col-6">
-                                                <label for="Photo">Максимум фото со страницы</label>
-                                                <input type="number" min=0 class="form-control" id="Photo"
-                                                       aria-describedby="PhotoHelp" required>
-                                                <small id="PhotoHelp" class="form-text text-muted">Количество фото
-                                                    должно
-                                                    быть в диапазоне от 1 до 10.</small>
-                                            </div>
-                                            <div class="form-group col-6">
-                                                <label for="Folder">Максимум папок в пакете</label>
+                                        <div class="form-group col-6">
+                                                <label for="Folder">Максимум вакансий в пакете</label>
                                                 <input type="number" min=0 class="form-control" id="Folder"
                                                        aria-describedby="FolderHelp" required>
-                                                <small id="FolderHelp" class="form-text text-muted">Количество папок
+                                                <small id="FolderHelp" class="form-text text-muted">Количество вакансий
                                                     должно
-                                                    быть в диапазоне от 1 до 500.</small>
+                                                    быть в диапазоне от 1 до 1500.</small>
                                             </div>
-                                        </div>
-                                        <div class="row">
                                             <div class="form-group col-6">
                                                 <label for="PackAmount">Максимум пакетов</label>
                                                 <input type="number" min=0 class="form-control" id="PackAmount"
@@ -261,7 +263,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="modal fade" id="createParserModal" tabindex="-1" role="dialog"
+                    <!-- <div class="modal fade" id="createParserModal" tabindex="-1" role="dialog"
                          aria-labelledby="createParserModalLabel" aria-hidden="true">
                         <div class="modal-dialog modal-sm" style="width: 350px">
                             <div class="modal-content">
@@ -324,7 +326,7 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </div> -->
                 {% endblock main_content %}
         </form>
     </main>
@@ -346,64 +348,12 @@
         });
     </script>
     <script>
-        $('#proxyTypeSelect').on('change', function () {
-            var proxyTypeSelect = $('#proxyTypeSelect').val();
-            var proxyShow = document.getElementById('proxyTypeSock');
-            if (proxyTypeSelect == 'socks') {
-                proxyShow.style.display = "block";
-            } else if (proxyTypeSelect == 'http') {
-                var golo = $('#LoginProxy').val();
-                $('#LoginProxy').val('');
-                $('#PasswordProxy').val('');
-                proxyShow.style.display = "none";
-            }
-        })
-        $('.addProxyBTN').on('click', function () {
-            var proxyType = $('#proxyTypeSelect').val();
-            var proxyIp = $('#IpPort').val();
-            var proxyLogin = $('#LoginProxy').val();
-            var proxyPass = $('#PasswordProxy').val();
-            $.ajax({
-                url: '/vk/create_proxy/',
-                method: 'POST',
-                data: {
-                    proxyType: proxyType,
-                    proxyIp: proxyIp,
-                    proxyLogin: proxyLogin,
-                    proxyPass: proxyPass
-                },
-                success: function (result) {
-                    if (result.success) {
-                        Swal.fire({
-                            title: 'Успешно!',
-                            text: result.message,
-                            icon: 'success',
-                            timer: 3000,
-                            showConfirmButton: true
-                        }).then(() => {
-                            window.location.href = '';
-                        });
-                    } else {
-                        Swal.fire({
-                            title: 'Ошибка!',
-                            text: result.message,
-                            icon: 'error',
-                            timer: 4000,
-                            showConfirmButton: true
-                        });
-                    }
-                }
-            })
-        })
-
-    </script>
-    <script>
         var parser_settings_id;
 
 
         function get_parser_status(id_) {
             $.ajax({
-                url: '/vk/parser_status/',
+                url: "{% url 'core:status' %}",
                 method: 'GET',
                 data: {
                     'parsers_id': id_
@@ -411,22 +361,22 @@
                 success: function (data) {
                     console.log(data);
                     if (data.status == 'success') {
-                        $('#' + id_ + '_country').text(data.parserCountry);
+                        $('#' + id_ + '_Vacansy').text(data.parserVacansy);
                         $('#' + id_ + '_city').text(data.parserCity);
                         $('#' + id_ + '_age').text(data.parserAgeFrom + '-' + data.parserAgeTo);
-                        $('#' + id_ + '_procesedid').text(data.parserParsedId);
-                        $('#' + id_ + '_processphoto').text(data.parserParsedPhotos);
+                        $('#' + id_ + '_procesvacancy').text(data.parserParsedVacancy);
+                        $('#' + id_ + '_vacancy').text(data.parserVacancy);
                         if (data.isPaused == false) {
                             $('#' + id_ + '_IsPaused').removeClass("btn-warning").addClass('btn-outline-warning');
                         } else if (data.isPaused == true) {
                             $('#' + id_ + '_IsPaused').removeClass("btn-outline-warning").addClass('btn-warning');
                         }
                     } else {
-                        $('#' + id_ + '_country').text('');
+                        $('#' + id_ + '_Vacansy').text('');
                         $('#' + id_ + '_city').text('');
                         $('#' + id_ + '_age').text('');
-                        $('#' + id_ + '_procesedid').text('');
-                        $('#' + id_ + '_processphoto').text('');
+                        $('#' + id_ + '_procesvacancy').text('');
+                        $('#' + id_ + '_vacancy').text('');
                     }
 
                 }
@@ -439,7 +389,7 @@
             var parserID = childElem.innerHTML;
 
             $.ajax({
-                url: '/vk/parser_status/',
+                url: "{% url 'core:status' %}",
                 method: 'GET',
                 data: {
                     'parsers_id': parserID
@@ -449,14 +399,14 @@
                     if (data.status == 'success') {
                         console.log(data.status);
                         $('#parserStatus').text(data.parserStatus);
-                        $('#parserCountry').text(data.parserCountry);
+                        $('#parserVacancy').text(data.parserVacancy);
                         $('#parserCity').text(data.parserCity);
                         $('#parserThread').text(data.parserThread);
-                        $('#parserSex').text(data.parserSex);
+                        $('#parserWebsite').text(data.parserWebsite);
                         $('#parserAgeFrom').text(data.parserAgeFrom);
                         $('#parserAgeTo').text(data.parserAgeTo);
-                        $('#parserPhotoByPage').text(data.parserPhotoByPage);
                         $('#parserFilesInPakage').text(data.parserFilesInPakage);
+                        $('#parserPakages').text(data.parserPakages);
                         $('#parserParsedId').text(data.parserParsedId);
                         $('#parserParsedPages').text(data.parserParsedPhotos);
 
@@ -479,9 +429,9 @@
 
         var cityInput = $('#City');
 
-        $(document).ready(function () {
+        {% comment %} $(document).ready(function () {
 
-            $('#Country').change(function () {
+            $('#Vacancy').change(function () {
                 node = document.getElementById('City');
                 while (node.firstChild) {
                     node.removeChild(node.firstChild);
@@ -493,7 +443,7 @@
                     method: 'POST',
                     data: {
                         'csrfmiddlewaretoken': '{{ csrf_token }}',
-                        'country_id': self.val()
+                        'Vacansy_id': self.val()
                     },
                     success: function (result) {
                         let option = $('<option />', {val: 'Выбрать', text: 'Выбрать', class: 'city_option'});
@@ -519,12 +469,12 @@
                     continue;
                 }
             }
-        })
+        }) {% endcomment %}
 
         function run(parsers_id) {
             console.log(parsers_id);
             $.ajax({
-                url: '/vk/action_parser/',
+                url: "{% url 'core:action_scrapper' %}",
                 method: 'POST',
                 data: {
                     'csrfmiddlewaretoken': '{{ csrf_token }}',
@@ -539,10 +489,8 @@
 
 
         function pause(parsers_id) {
-
-
             $.ajax({
-                url: '/vk/pause_status/',
+                url: "{% url 'core:pause_status' %}",
                 method: 'GET',
                 data: {
                     'csrfmiddlewaretoken': '{{ csrf_token }}',
@@ -551,11 +499,8 @@
                 success: function (result) {
                     console.log(result);
                     set_status(result['status_pause'], parsers_id);
-
                 }
             })
-
-
         }
 
         function set_status(pause_status, parsers_id) {
@@ -570,7 +515,7 @@
                 })
             } else if (pause_status) {
                 $.ajax({
-                    url: '/vk/action_parser/',
+                    url: "{% url 'core:action_scrapper' %}",
                     method: 'POST',
                     data: {
                         'csrfmiddlewaretoken': '{{ csrf_token }}',
@@ -584,7 +529,7 @@
                 })
             } else {
                 $.ajax({
-                    url: '/vk/action_parser/',
+                    url: "{% url 'core:action_scrapper' %}",
                     method: 'POST',
                     data: {
                         'csrfmiddlewaretoken': '{{ csrf_token }}',
@@ -602,7 +547,7 @@
 
         function stop(parsers_id) {
             $.ajax({
-                url: '/vk/action_parser/',
+                url: "{% url 'core:action_scrapper' %}",
                 method: 'POST',
                 data: {
                     'csrfmiddlewaretoken': '{{ csrf_token }}',
@@ -626,49 +571,46 @@
         $('.settingApplyBTN').on('click', function () {
 
             let token = $(this).attr('data-token');
-            let country = $('#Country').val();
+            let Vacancy = $('#Vacancy').val();
             let city = $('#City').val();
-            let sex = $('#Sex').val();
-            let photo = $('#Photo').val();
+            let website = $('#website').val();
             let thread = $('#Thread').val();
             let folder = $('#Folder').val();
-            let minage = $('#MinAge').val();
-            let maxage = $('#MaxAge').val();
+            let MinStage = $('#MinStage').val();
+            let MaxStage = $('#MaxStage').val();
             let PackAmount = $('#PackAmount').val();
-
 
             console.log(parser_settings_id);
 
-            if (minage > maxage) {
-                document.getElementById("MaxAgeError").innerHTML = "Ошибка возраста"
+            if (MinStage > MaxStage) {
+                document.getElementById("MaxStageError").innerHTML = "Ошибка стажа"
             } else {
-                document.getElementById("MaxAgeError").innerHTML = '';
-                if (minage < 16) {
-                    $('#MinAge').val(16);
-                    minage = 16;
+                document.getElementById("MaxStageError").innerHTML = '';
+                if (MinStage < 1) {
+                    $('#MinStage').val(1);
+                    MinStage = 1;
                 }
 
-                if (maxage < 16) {
-                    $('#MaxAge').val(16);
-                    maxage = 16;
+                if (MaxStage < 2) {
+                    $('#MaxStage').val(2);
+                    MaxStage = 2;
                 }
 
 
                 $.ajax({
-                    url: '/vk/set_filter_settings/',
+                    url: "{% url 'core:set_filter_settings' %}",
                     method: 'GET',
                     contentType: 'application/json; charset=utf-8',
                     dataType: 'json',
                     data: {
                         'ID': parser_settings_id,
-                        'Country': country,
+                        'Vacancy': Vacancy,
                         'City': city,
-                        'Sex': sex,
-                        'Photo': photo,
+                        'Website': website,
                         'Thread': thread,
                         'Folder': folder,
-                        'MinAge': minage,
-                        'MaxAge': maxage,
+                        'MinStage': MinStage,
+                        'MaxStage': MaxStage,
                         'PackAmount': PackAmount
                     },
                     success: function (result) {
@@ -704,7 +646,7 @@
             let password = $('#Password').val();
             let name = $('#CreateName').val();
             $.ajax({
-                url: '/vk/create_parser/',
+                url: "{% url 'core:create_parser' %}",
                 method: 'POST',
                 data: {
                     'csrfmiddlewaretoken': '{{ csrf_token }}',
