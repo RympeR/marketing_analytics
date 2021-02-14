@@ -1,15 +1,16 @@
 import abc
 import requests
 import json
-from scrappers.dou_scrapper import DouScrapper
-from scrappers.hh_scrapper import HHScrapper
-from scrappers.rabota_scrapper import RabotaScrapper
-from scrappers.work_ua_scrapper import WorkUaScrapper
-from types import Optional
-from psycopg_models import *
+from typing import Optional
+from .scrappers.dou_scrapper import DouScrapper
+from .scrappers.hh_scrapper import HHScrapper
+from .scrappers.rabota_scrapper import RabotaScrapper
+from .scrappers.work_ua_scrapper import WorkUaScrapper
+from .psycopg_models import *
+from .data_sender import *
+import sqlite3
 
-
-class Datamaster(abc):
+class Datamaster(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def sendVacancys(self, vacancys):
         pass
@@ -48,7 +49,7 @@ class RabotaApiDataMaster(Datamaster):
                 self.data = self.rabotaApiMaster.getVacancysPack(
                     VacancysInPack, filter_vacancy_name)
         self.saveVacansys(self.data)
-        
+
     def saveVacansys(self, vacansys):
         pass
 

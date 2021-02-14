@@ -5,7 +5,7 @@ import time
 import json
 from datetime import datetime
 from icecream import ic
-from datamanager import Datamaster
+from .datamanager import Datamaster, RabotaApiDataMaster, WorkUaApiDataMaster, DouApiDataMaster, HHApiDataMaster
 from multiprocessing import Pool
 
 
@@ -29,7 +29,10 @@ class ScrapperController:
         # statistic
         self.startTime = None
         self.collectedVacansys = 0
-        self.datamaster = Datamaster()
+        self.datamasterWorkUa = WorkUaApiDataMaster()
+        self.datamasterDou = DouApiDataMaster()
+        self.datamasterHH = HHApiDataMaster()
+        self.datamasterRabotaUa = RabotaApiDataMaster()
 
     def toDefaultState(self):
         self.runThreads = False
@@ -132,7 +135,7 @@ class ScrapperController:
                 try:
                     self.handleIdsPack(
                         ThreadNum, IdsInPack=self.settings['ids in pack'])
-                except exceptions.VK_RatelimitException:
+                except Exception:
                     self.ambassador.nextConnection()
                     self.handleIdsPack(
                         ThreadNum, IdsInPack=self.settings['ids in pack'])

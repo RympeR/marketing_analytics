@@ -1,17 +1,23 @@
-from fastapi import FastAPI
-from typing import Optional
+#!/usr/bin/env python3
+import sys
 import os
-os.sys.path.append('..')
 
-# from dirmanager.init_file import *
-from .scrappermanager.init_file import *
+sys.path.append('..')
 
-# from psycopg_models import *
+from fastapi import FastAPI, File, UploadFile, Depends, Query
+from typing import Optional, List
+import json
+
+from dirmanager.init_file import *
+from scrappermanager.init_file import *
+
 # from models import *
 
 
 app = FastAPI()
 
+def location_dict(locations: List[str] = Query(...)):
+    return list(map(json.loads, locations))
 
 # -----------------------GET REQUESTS-----------------------
 
@@ -61,9 +67,9 @@ def create_scrapper():
 
 
 @app.post("set_filters/")
-def set_filters(params: Optional[dict]):
+def set_filters(params: list = Depends(location_dict)):
     try:
-        SCRAPPER_CONTROLLER.setFilter(params)
+        SCRAPPER_CONTROLLER.setFilter(params[0])
         data = {
             'status': 'success'
         }
@@ -77,9 +83,9 @@ def set_filters(params: Optional[dict]):
     return data
 
 @app.post("set_setting/")
-def set_setting(params: Optional[dict]):
+def set_setting(params: list = Depends(location_dict)):
     try:
-        SCRAPPER_CONTROLLER.setFilter(params)
+        SCRAPPER_CONTROLLER.setFilter(params[0])
         data = {
             'status': 'success'
         }
@@ -95,9 +101,9 @@ def set_setting(params: Optional[dict]):
 
 
 @app.put('update_filters/')
-def update_filters(params: Optional[dict]):
+def update_filters(params: list = Depends(location_dict)):
     try:
-        SCRAPPER_CONTROLLER.setFilter(params)
+        SCRAPPER_CONTROLLER.setFilter(params[0])
         data = {
             'status': 'success'
         }

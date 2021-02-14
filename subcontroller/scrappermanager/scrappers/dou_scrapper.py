@@ -1,4 +1,4 @@
-from .scrapperinterface import *
+from .scrapperInterface import *
 
 options = webdriver.ChromeOptions()
 
@@ -15,11 +15,15 @@ class DouScrapper(ScrapperApi):
                 'vacancyInPack': 150,
                 'vacancyName': 'it'
             }
+        
+        self.need_authorization = need_authorization
+
+    def initialize_drive(self):
         self.driver = webdriver.Chrome(
                 PATH,
                 options=options
         )
-        if need_authorization:
+        if self.need_authorization:
             with open('creads.json', 'r', encoding='utf-8') as f:
                 self.creds = random.choice(ujson.loads(f.readlines())['creds'])
             

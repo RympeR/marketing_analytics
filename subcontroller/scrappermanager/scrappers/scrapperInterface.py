@@ -14,7 +14,7 @@ from selenium import webdriver
 from icecream import ic
 
 
-class ScrapperApi(abc):
+class ScrapperApi(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def setFilters(self, filters: dict):
         """[summary]
@@ -48,5 +48,12 @@ class ScrapperApi(abc):
     def setToDefault(self):
         """[summary]
             Abstract method for setting filters to default
+        """
+        pass
+    
+    @abc.abstractmethod
+    def initialize_drive(self):
+        """[summary]
+            Abstract method for initalizaing driver
         """
         pass

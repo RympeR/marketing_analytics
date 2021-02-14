@@ -14,7 +14,7 @@ ic.configureOutput(prefix=time_format)
 
 
 class DataSender:
-    def __init__(self, NEURO_URL):
+    def __init__(self, NEURO_URL='127.0.0.1:7998'):
         self.neuro_url = NEURO_URL
 
     def send_data(self, data: dict):
