@@ -1,12 +1,41 @@
 {
-    "creds":[
-        {
-            "login":"123",
-            "password":"234"
-        },
-        {
-            "login":"123",
-            "password":"234"
-        }
-    ]
+    "creds": {
+        "dou.ua": [{
+                "login": "123",
+                "password": "234"
+            },
+            {
+                "login": "1234",
+                "password": "2345"
+            }
+        ],
+        "rabota.ua": [{
+                "login": "123",
+                "password": "234"
+            },
+            {
+                "login": "1234",
+                "password": "2345"
+            }
+        ],
+        "work.ua": [{
+                "login": "123",
+                "password": "234"
+            },
+            {
+                "login": "1234",
+                "password": "2345"
+            }
+        ],
+        "hh.ua": [{
+                "login": "123",
+                "password": "234"
+            },
+            {
+                "login": "1234",
+                "password": "2345"
+            }
+        ]
+    }
+
 }

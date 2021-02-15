@@ -1,5 +1,5 @@
 from .scrapperInterface import *
-
+from datetime import datetime
 options = webdriver.ChromeOptions()
 
 # user-agent
@@ -27,7 +27,8 @@ class DouScrapper(ScrapperApi):
         )
         if self.need_authorization:
             with open('creads.json', 'r', encoding='utf-8') as f:
-                self.creds = random.choice(ujson.loads(f.readlines())['creds'])
+                self.creds = random.choice(ujson.loads(
+                    f.readlines())['creds']['dou.ua'])
             self.authorize(self.creds)
 
     def setFilters(self, filters: dict):
@@ -42,5 +43,37 @@ class DouScrapper(ScrapperApi):
         self.cookies = self.driver.get_cookies()
 
     def getVacancyPack(self, pack_amount: int = 150, vacancy_name: Optional[str] = None):
-        data = {}
+        self.driver.get('https://jobs.dou.ua/vacancies/')
+        self.driver.find_element_by_xpath(
+            '/div[2]/div[1]/div[2]/div[2]/form/span/input').send_keys(vacancy_name)
+        self.driver.find_element_by_xpath(
+            '#container > div.header > div.b-sub-head-n > div.b-jobs-search > form > input'
+        ).click()
+        hrefs = self.driver.find_element_by_class_name('vt')
+        vacany_amount = len(hrefs)
+        while vacany_amount < pack_amount:
+            self.driver.find_element_by_css_selector(
+                '#vacancyListId > div > a').click()
+            hrefs = self.driver.find_element_by_class_name('vt')
+            vacany_amount = len(hrefs)
+        hrefs = [href.get_attribute('href') for href in hrefs]
+        data = []
+        data_params = {
+            'vacancy_name': '',
+            'salary': '',
+            'city': '',
+            'country': '',
+            'work_category': '',
+            'website_name': 'dou.ua',
+            'posted_date': '',
+            'effectivness': 0.0,
+            'experience': 0.0,
+        }
+        for ind, href in enumerate(hrefs):
+            data.append(data_params)
+            self.driver.get(href)
+        try:
+            self.driver.find_element_by_xpath()
+        except Exception:
+            pass
         return data
