@@ -10,7 +10,8 @@ from .datamanager import (
     DouScrapper,
     HHScrapper,
     RabotaScrapper,
-    WorkUaScrapper
+    WorkUaScrapper,
+    ZipArchiver
 )
 from multiprocessing import Pool
 

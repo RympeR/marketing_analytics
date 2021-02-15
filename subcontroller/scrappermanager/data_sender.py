@@ -2,6 +2,7 @@ import requests
 from icecream import ic
 from datetime import datetime
 import time
+from .dirmanager.init_file import *
 
 
 def time_format():
@@ -14,22 +15,29 @@ ic.configureOutput(prefix=time_format)
 
 
 class DataSender:
-    def __init__(self, NEURO_URL='127.0.0.1:7998'):
-        self.neuro_url = NEURO_URL
+    def __init__(self, ip, port, filtrSubURL, readySubURL):
+        self.ip = ip
+        self.port = port
+        self.filtrSubURL = filtrSubURL
+        self.readySubURL = readySubURL
 
-    def send_data(self, data: dict):
-        response = 500
-        while response != 200:
-            response = requests.get(self.neuro_url)
-            if response.status_code != 200:
-                ic('Failed to get status:-> ', response.status_code)
-                time.sleep(5)
+    def waitWhileBusy(self):
+        response_code = 0
+        while response_code != 200:
+            url = 'http://{}:{}{}'.format(self.ip, self.port, self.readySubURL)
+            response_code = requests.get(url).status_code
+            ic(f'\nAnswer from API {response_code}\n')
+            if response_code != 200:
+                time.sleep(1)
 
-        try:
-            response = requests.post(self.neuro_url, params=data)
-            ic('sended data:->', data)
-        except Exception as e:
-            with open('info/logs.txt', 'a') as f:
-                f.write(ic('Failed data sender'))
-                f.write(ic(e))
-                f.write('-' * 10)
+    def sendArchive(self, path):
+        self.waitWhileBusy()
+        url = 'http://{}:{}{}'.format(self.ip, self.port,  self.filtrSubURL)
+        files = {'archive': open(path, 'rb')}
+        ic('######FILES TO SEND####')
+        ic(files)
+        ic(f'\n{path}')
+        ic('###########')
+        response = requests.post(url, files=files)
+        ic(response.status_code)
+        return response.status_code

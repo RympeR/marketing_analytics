@@ -11,6 +11,8 @@ from .data_sender import *
 import sqlite3
 import pandas as pd
 from .dirmanager.init_file import *
+k = 0
+
 
 class Datamaster:
     @staticmethod
@@ -28,12 +30,19 @@ class Datamaster:
             if filter_vacancy_name:
                 data = ApiMaster.getVacancysPack(
                     VacancysInPack, filter_vacancy_name)
-        Datamaster.saveVacansys(data)
+        path = "Loadead/"+thread_num
+        try:
+            os.makedirs(path)
+        except FileExistsError:
+            pass
+        Datamaster.saveVacansys(data, path, thread_num)
 
     @staticmethod
-    def saveVacansys(vacansys, ApiMaster,thread_num='_'):
+    def saveVacansys(vacansys, path, thread_num='_'):
+        global k
         df = pd.DataFrame.from_dict(vacansys)
-        df.to_csv(f'{thread_num}_data.csv',encoding='utf-8')
+        df.to_csv(f'{path}/{k}_data.csv', encoding='utf-8')
+        k += 1
 
     @staticmethod
     def setFilters(filters, ApiMaster, to_default=False):
