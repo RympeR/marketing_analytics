@@ -5,7 +5,13 @@ import time
 import json
 from datetime import datetime
 from icecream import ic
-from .datamanager import Datamaster, RabotaApiDataMaster, WorkUaApiDataMaster, DouApiDataMaster, HHApiDataMaster
+from .datamanager import (
+    Datamaster,
+    DouScrapper,
+    HHScrapper,
+    RabotaScrapper,
+    WorkUaScrapper
+)
 from multiprocessing import Pool
 
 
@@ -21,6 +27,12 @@ class ScrapperController:
     """
 
     def __init__(self, site_to_parce='work.ua', filterParams=None):
+        self.sites = {
+            'rabota.ua': RabotaScrapper,
+            'work.ua': WorkUaScrapper,
+            'dou.ua': DouScrapper,
+            'hh.ua': HHScrapper
+        }
         self.ThreadsList = []
         self.runThreads = False
         self.isPaused = False
@@ -29,19 +41,21 @@ class ScrapperController:
         # statistic
         self.startTime = None
         self.collectedVacansys = 0
-        self.datamasterWorkUa = WorkUaApiDataMaster()
-        self.datamasterDou = DouApiDataMaster()
-        self.datamasterHH = HHApiDataMaster()
-        self.datamasterRabotaUa = RabotaApiDataMaster()
+        self.datamaster = Datamaster()
 
     def toDefaultState(self):
         self.runThreads = False
         self.isPaused = False
         self.startTime = None
         self.collectedVacansys = 0
+        self.datamaster.setFilter(
+            self.filterParams,
+            self.sites[self.siteToParse],
+            True
+        )
 
-    def change_website(self):
-        pass
+    def change_website(self, site_to_parce: str):
+        self.siteToParse = site_to_parce
 
     def quitAllThreads(self):
         ic("IdsCollector qiting all threads")
@@ -66,10 +80,12 @@ class ScrapperController:
 
     def setFilter(self, filterParams: dict):
         self.filterParams = filterParams
+        self.datamaster.setFilter(
+            self.filterParams, self.sites[self.siteToParse])
 
     def run(self):
         self.startTime = datetime.now()
-        self.collectedIds = 0
+        self.collectedVacansys = 0
         self.runThreads = True
         ic('#########################################')
         ic('\n\n\nVacansys collector is fcking running\n\n\n')
@@ -107,7 +123,7 @@ class ScrapperController:
 
     def vacancyLoop(self, ThreadNum):
         ic("started vacancyLoop with arguments:\n\tvacancy_in_pack = {}\n\tThreadNum = {}\n\tmemLimit = {}\n\tpackLimit = {}".format(
-            self.settings['vacancy in pack'],
+            self.settings['vacancys in pack'],
             self.settings['vacancy name'],
             ThreadNum,
             self.settings['memory limit'],
@@ -120,28 +136,23 @@ class ScrapperController:
             count = 0
             while self.runThreads and count < pack_amount:
                 count += 1
-                ic(f'\n Iteration photo loop#{count}\n')
+                ic(f'\n Iteration vacancys loop#{count}\n')
                 try:
                     self.handleIdsPack(
-                        ThreadNum, IdsInPack=self.settings['ids in pack'])
+                        ThreadNum, vacancyInPack=self.settings['vacancys in pack'])
                 except Exception as e:
-                    self.ambassador.nextConnection()
-                    self.handleIdsPack(
-                        ThreadNum, IdsInPack=self.settings['ids in pack'])
-
+                    with open('info/logs.txt', 'a', encoding='utf-8') as f:
+                        f.write(ic('mistake in->\n', e, '\n'))
                 time.sleep(0.1)
         else:
             while self.runThreads:
                 try:
                     self.handleIdsPack(
-                        ThreadNum, IdsInPack=self.settings['ids in pack'])
+                        ThreadNum, vacancyInPack=self.settings['vacancys in pack'])
                 except Exception:
                     self.ambassador.nextConnection()
-                    self.handleIdsPack(
-                        ThreadNum, IdsInPack=self.settings['ids in pack'])
+                    self.datamaster.getVacancysPack(
+                        ThreadNum, vacancyInPack=self.settings['vacancys in pack'])
 
                 time.sleep(0.1)
         ic("Quiting thread '{}'".format(ThreadNum))
-
-    def handleVacancyPack(self, vacancyInPack=150, filters=None):
-        pass

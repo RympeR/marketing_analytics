@@ -9,149 +9,35 @@ from .scrappers.work_ua_scrapper import WorkUaScrapper
 from .psycopg_models import *
 from .data_sender import *
 import sqlite3
+import pandas as pd
+from .dirmanager.init_file import *
 
-class Datamaster(metaclass=abc.ABCMeta):
-    @abc.abstractmethod
-    def sendVacancys(self, vacancys):
+class Datamaster:
+    @staticmethod
+    def sendVacancys(vacancys, ApiMaster):
         pass
 
-    @abc.abstractmethod
-    def getVacancysPack(self, VacancysInPack=100, vacancy_name: Optional[str] = None):
-        pass
-
-    @abc.abstractmethod
-    def saveVacansys(self, vacansys):
-        pass
-
-    @abc.abstractmethod
-    def setFilters(self, filters, to_default=False):
-        pass
-
-
-class RabotaApiDataMaster(Datamaster):
-    def __init__(self, filters: Optional[dict] = None):
-        if filters:
-            self.rabotaApiMaster = RabotaScrapper(filters)
-        else:
-            self.rabotaApiMaster = RabotaScrapper()
-
-    def sendVacancys(self, vacancys):
-        pass
-
-    def getVacancysPack(self, VacancysInPack=100, vacancy_name: Optional[str] = None):
+    @staticmethod
+    def getVacancysPack(ApiMaster, VacancysInPack=100, vacancy_name: Optional[str] = None, thread_num='_'):
         if vacancy_name:
-            self.data = self.rabotaApiMaster.getVacancysPack(
+            data = ApiMaster.getVacancysPack(
                 VacancysInPack, vacancy_name)
         else:
-            filter_vacancy_name = self.rabotaApiMaster.filters.get(
+            filter_vacancy_name = ApiMaster.filters.get(
                 'vacancyName', None)
             if filter_vacancy_name:
-                self.data = self.rabotaApiMaster.getVacancysPack(
+                data = ApiMaster.getVacancysPack(
                     VacancysInPack, filter_vacancy_name)
-        self.saveVacansys(self.data)
+        Datamaster.saveVacansys(data)
 
-    def saveVacansys(self, vacansys):
-        pass
+    @staticmethod
+    def saveVacansys(vacansys, ApiMaster,thread_num='_'):
+        df = pd.DataFrame.from_dict(vacansys)
+        df.to_csv(f'{thread_num}_data.csv',encoding='utf-8')
 
-    def setFilters(self, filters, to_default=False, vacancy_name: Optional[str] = None):
+    @staticmethod
+    def setFilters(filters, ApiMaster, to_default=False):
         if to_default:
-            self.rabotaApiMaster.setFilters(filters)
+            ApiMaster.setFilters(filters)
         else:
-            self.rabotaApiMaster.setToDefault()
-
-
-class WorkUaApiDataMaster(Datamaster):
-    def __init__(self, filters: Optional[dict] = None):
-        if filters:
-            self.workUaApiMaster = WorkUaScrapper(filters)
-        else:
-            self.workUaApiMaster = WorkUaScrapper()
-
-    def sendVacancys(self, vacancys):
-        pass
-
-    def getVacancysPack(self, VacancysInPack=100, vacancy_name: Optional[str] = None):
-        if vacancy_name:
-            self.data = self.workUaApiMaster.getVacancysPack(
-                VacancysInPack, vacancy_name)
-        else:
-            filter_vacancy_name = self.workUaApiMaster.filters.get(
-                'vacancyName', None)
-            if filter_vacancy_name:
-                self.data = self.workUaApiMaster.getVacancysPack(
-                    VacancysInPack, filter_vacancy_name)
-        self.saveVacansys(self.data)
-
-    def saveVacansys(self, vacansys):
-        pass
-
-    def setFilters(self, filters, to_default=False):
-        if to_default:
-            self.workUaApiMaster.setFilters(filters)
-        else:
-            self.workUaApiMaster.setToDefault()
-
-
-class HHApiDataMaster(Datamaster):
-    def __init__(self, filters: Optional[dict] = None):
-        if filters:
-            self.hhApiMaster = HHScrapper(filters)
-        else:
-            self.hhApiMaster = HHScrapper()
-
-    def sendVacancys(self, vacancys):
-        pass
-
-    def getVacancysPack(self, VacancysInPack=100, vacancy_name: Optional[str] = None):
-        if vacancy_name:
-            self.data = self.hhApiMaster.getVacancysPack(
-                VacancysInPack, vacancy_name)
-        else:
-            filter_vacancy_name = self.hhApiMaster.filters.get(
-                'vacancyName', None)
-            if filter_vacancy_name:
-                self.data = self.hhApiMaster.getVacancysPack(
-                    VacancysInPack, filter_vacancy_name)
-
-        self.saveVacansys(self.data)
-
-    def saveVacansys(self, vacansys):
-        pass
-
-    def setFilters(self, filters, to_default=False):
-        if to_default:
-            self.hhApiMaster.setFilters(filters)
-        else:
-            self.hhApiMaster.setToDefault()
-
-
-class DouApiDataMaster(Datamaster):
-    def __init__(self, filters: Optional[dict] = None):
-        if filters:
-            self.douApiMaster = DouScrapper(filters)
-        else:
-            self.douApiMaster = DouScrapper()
-
-    def sendVacancys(self, vacancys):
-        pass
-
-    def getVacancysPack(self, VacancysInPack=100, vacancy_name: Optional[str] = None):
-        if vacancy_name:
-            self.data = self.douApiMaster.getVacancysPack(
-                VacancysInPack, vacancy_name)
-        else:
-            filter_vacancy_name = self.douApiMaster.filters.get(
-                'vacancyName', None)
-            if filter_vacancy_name:
-                self.data = self.douApiMaster.getVacancysPack(
-                    VacancysInPack, filter_vacancy_name)
-        self.saveVacansys(self.data)
-
-    def saveVacansys(self, vacansys):
-        pass
-
-    def setFilters(self, filters, to_default=False):
-        if to_default:
-            self.douApiMaster.setFilters(filters)
-        else:
-            self.douApiMaster.setToDefault()
+            ApiMaster.setToDefault()

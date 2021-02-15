@@ -8,7 +8,7 @@ from fastapi import FastAPI, File, UploadFile, Depends, Query
 from typing import Optional, List
 import json
 
-from dirmanager.init_file import *
+
 from scrappermanager.init_file import *
 
 # from models import *

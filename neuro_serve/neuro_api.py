@@ -11,13 +11,13 @@ def location_dict(locations: List[str] = Query(...)):
 # -----------------------GET REQUESTS-----------------------
 
 @app.get("/")
-def read_root():
+async def read_root():
     return {"Hello": "You at neuro serve api"}
 
 @app.post('/save-data')
-def recieveData(data: list = Depends(location_dict)):
+async def recieveData(data: list = Depends(location_dict)):
     df = pd.DataFrame.from_dict(data[0])
-    df.to_csv('data.csv',encoding='utf-8',  index_col=False)
+    df.to_csv('data.csv',encoding='utf-8')
     return {
         'status':'proccessed',
         'data': data
