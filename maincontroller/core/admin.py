@@ -3,23 +3,6 @@ from .models import *
 # Register your models here.
 
 
-class ClientAdmin(admin.ModelAdmin):
-    list_display = [
-        'login',
-        'work_stage',
-        'salary_preference'
-    ]
-    list_display_links = [
-        'login'
-    ]
-    list_filter = [
-        'work_stage'
-    ]
-    search_fields = [
-        'login'
-    ]
-
-
 class ScrapperAdmin(admin.ModelAdmin):
     list_display = [
         'name',
@@ -39,7 +22,5 @@ class ScrapperAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Scrapper, ScrapperAdmin)
-admin.site.register(Client, ClientAdmin)
-admin.site.register(ClientWork)
-admin.site.register(ClientWorkPreferences)
+
 admin.site.register(City)
