@@ -35,14 +35,17 @@ class Datamaster:
             os.makedirs(path)
         except FileExistsError:
             pass
-        Datamaster.saveVacansys(data, path, thread_num)
+        path = Datamaster.saveVacansys(data, path, thread_num)
+        return path
 
     @staticmethod
     def saveVacansys(vacansys, path, thread_num='_'):
         global k
         df = pd.DataFrame.from_dict(vacansys)
-        df.to_csv(f'{path}/{k}_data.csv', encoding='utf-8')
+        path = f'{path}/{k}_data.csv'
+        df.to_csv(path, encoding='utf-8')
         k += 1
+        return path
 
     @staticmethod
     def setFilters(filters, ApiMaster, to_default=False):

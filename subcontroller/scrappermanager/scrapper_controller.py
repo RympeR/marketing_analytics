@@ -5,6 +5,7 @@ import time
 import json
 from datetime import datetime
 from icecream import ic
+from .datasender import DataSender
 from .datamanager import (
     Datamaster,
     DouScrapper,
@@ -34,6 +35,12 @@ class ScrapperController:
             'dou.ua': DouScrapper,
             'hh.ua': HHScrapper
         }
+        self.datasender = DataSender(
+            '127.0.0.1',
+            '7999',
+            '/',
+            '/uploadfile/'
+        )
         self.ThreadsList = []
         self.runThreads = False
         self.isPaused = False
@@ -133,27 +140,42 @@ class ScrapperController:
         pack_amount = self.settings.get('pack amount', None)
         ic(f'\n pack amount \n\t{pack_amount}\n')
         if pack_amount:
-
             count = 0
             while self.runThreads and count < pack_amount:
                 count += 1
                 ic(f'\n Iteration vacancys loop#{count}\n')
                 try:
-                    self.handleIdsPack(
+                    data_path = self.handleVacancysPack(
                         ThreadNum, vacancyInPack=self.settings['vacancys in pack'])
+                    self.datasender.sendArchive(data_path)
                 except Exception as e:
                     with open('info/logs.txt', 'a', encoding='utf-8') as f:
                         f.write(ic('mistake in->\n', e, '\n'))
                 time.sleep(0.1)
+
         else:
             while self.runThreads:
                 try:
-                    self.handleIdsPack(
+                    data_path = self.handleVacancysPack(
                         ThreadNum, vacancyInPack=self.settings['vacancys in pack'])
-                except Exception:
-                    self.ambassador.nextConnection()
-                    self.datamaster.getVacancysPack(
-                        ThreadNum, vacancyInPack=self.settings['vacancys in pack'])
-
+                    self.datasender.sendArchive(data_path)
+                except Exception as e:
+                    with open('info/logs.txt', 'a', encoding='utf-8') as f:
+                        f.write(ic('mistake in->\n', e, '\n'))
                 time.sleep(0.1)
         ic("Quiting thread '{}'".format(ThreadNum))
+
+    def handleVacancysPack(self, thread_num='_', vacancyInPack=150):
+        if self.siteToParse == 'work.ua':
+            data_path = Datamaster.getVacancysPack(
+                WorkUaScrapper, vacancyInPack, self.settings['vacancy name'])
+        elif self.siteToParse == 'rabota.ua':
+            data_path = Datamaster.getVacancysPack(
+                RabotaScrapper, vacancyInPack, self.settings['vacancy name'])
+        elif self.siteToParse == 'dou.ua':
+            data_path = Datamaster.getVacancysPack(
+                DouScrapper, vacancyInPack, self.settings['vacancy name'])
+        elif self.siteToParse == 'hh.ua':
+            data_path = Datamaster.getVacancysPack(
+                HHScrapper, vacancyInPack, self.settings['vacancy name'])
+        return data_path

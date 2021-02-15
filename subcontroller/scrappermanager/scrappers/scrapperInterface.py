@@ -50,7 +50,7 @@ class ScrapperApi(metaclass=abc.ABCMeta):
             Abstract method for setting filters to default
         """
         pass
-    
+
     @abc.abstractmethod
     def initialize_drive(self):
         """[summary]
