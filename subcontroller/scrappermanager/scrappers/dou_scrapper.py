@@ -1,5 +1,6 @@
 from .scrapperInterface import *
 from datetime import datetime
+from dateutil import parser
 options = webdriver.ChromeOptions()
 
 # user-agent
@@ -44,8 +45,11 @@ class DouScrapper(ScrapperApi):
 
     def getVacancyPack(self, pack_amount: int = 150, vacancy_name: Optional[str] = None):
         self.driver.get('https://jobs.dou.ua/vacancies/')
+        self.driver.maximize_window()
         self.driver.find_element_by_xpath(
             '/div[2]/div[1]/div[2]/div[2]/form/span/input').send_keys(vacancy_name)
+        self.driver.execute_script(
+            "window.scrollTo(0, document.body.scrollHeight);")
         self.driver.find_element_by_xpath(
             '#container > div.header > div.b-sub-head-n > div.b-jobs-search > form > input'
         ).click()
@@ -72,8 +76,36 @@ class DouScrapper(ScrapperApi):
         for ind, href in enumerate(hrefs):
             data.append(data_params)
             self.driver.get(href)
-        try:
-            self.driver.find_element_by_xpath()
-        except Exception:
-            pass
+            try:
+                elem = self.driver.find_element_by_xpath()
+
+            except Exception:
+                pass
+            try:
+                elem = self.driver.find_element_by_xpath('//*[@id="container"]/div[2]/div/div[2]/div[1]/div/div[3]')
+                dt = parser.parse(elem.text)
+                
+            except Exception:
+                pass
+            try:
+                elem = self.driver.find_element_by_xpath()
+                        
+            except Exception:
+                pass
+            try:
+                elem = self.driver.find_element_by_xpath()
+                        
+            except Exception:
+                pass
+            try:
+                elem = self.driver.find_element_by_xpath()
+                        
+            except Exception:
+                pass
+            try:
+                elem = self.driver.find_element_by_xpath()
+                        
+            except Exception:
+                pass
+
         return data
