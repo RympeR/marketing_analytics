@@ -116,18 +116,27 @@ API - application programm interface
 git clone https://github.com/RympeR/marketing_analytics.git
 
 python -m venv venv
+
 venv\scripts\activate
+
 cd marketing_analytics
+
 pip install -r requirements.txt
 
 ### Обычный запуск
+
 git pull
+
 venv\scripts\activate
+
 cd marketing_analytics
 
 #### MainController
 
 venv\scripts\activate
+
 cd marketing_analytics
+
 cd maincontroller
+
 python manage.py runserver
