@@ -5,7 +5,7 @@ import time
 import json
 from datetime import datetime
 from icecream import ic
-from .datasender import DataSender
+from .data_sender import DataSender
 from .datamanager import (
     Datamaster,
     DouScrapper,
@@ -45,6 +45,7 @@ class ScrapperController:
         self.runThreads = False
         self.isPaused = False
         self.filterParams = filterParams
+        self.settings = {}
         self.siteToParse = site_to_parce
         # statistic
         self.startTime = None
@@ -86,10 +87,10 @@ class ScrapperController:
             "site to parse": self.siteToParse,
         }
 
-    def setFilter(self, filterParams: dict):
+    def setFilters(self, filterParams: dict):
         self.filterParams = filterParams
-        self.datamaster.setFilter(
-            self.filterParams, self.sites[self.siteToParse])
+        self.datamaster.setFilters(
+            self.filterParams, self.sites[self.filterParams['Website']])
 
     def run(self):
         self.startTime = datetime.now()

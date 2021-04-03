@@ -4,29 +4,29 @@ import os
 
 sys.path.append('..')
 
-from fastapi import FastAPI, File, UploadFile, Depends, Query
 from typing import Optional, List
 import json
 
+from flask import Flask, request, jsonify
+app = Flask(__name__)
 
 from scrappermanager.init_file import *
 
 # from models import *
 
 
-app = FastAPI()
 
-def location_dict(locations: List[str] = Query(...)):
-    return list(map(json.loads, locations))
+# def location_dict(locations: List[str] = Query(...)):
+#     return list(map(json.loads, locations))
 
 # -----------------------GET REQUESTS-----------------------
 
-@app.get("/")
+@app.route("/", methods=['GET'])
 def read_root():
     return {"Hello": "You at single parser api"}
 
 
-@app.get("status/")
+@app.route("/status/", methods=['GET'])
 def get_status():
     status = SCRAPPER_CONTROLLER.getStatus()
     try:
@@ -39,15 +39,13 @@ def get_status():
                 'collected vacancys':status['collected vacansys'],
                 'filter' : {} if status is {} else {
                     'website':status['site to parse'],
-                    'stage_from':status['filter']['stage_from'],
-                    'stage_to':status['filter']['stage_to'],
                     'number of threads':status['filter']['number of threads'],
-                    'city_name':status['filter']['city_name'],
                     'vacancys in pack':status['filter']['vacancys in pack'],
                 }
             }
         }
     except Exception as e:
+        print(e)
         data = {
             'status': 'failure',
         }
@@ -58,7 +56,7 @@ def get_status():
 
 # -----------------------POST REQUESTS-----------------------
 
-@app.post("create_scrapper/")
+@app.route("/create_scrapper/", methods=['POST'])
 def create_scrapper():
     
     return {
@@ -66,44 +64,46 @@ def create_scrapper():
     }
 
 
-@app.post("set_filters/")
-def set_filters(params: list = Depends(location_dict)):
-    try:
-        SCRAPPER_CONTROLLER.setFilter(params[0])
-        data = {
-            'status': 'success'
-        }
-    except Exception as e:
-        data = {
-            'status': 'failure',
-        }
-        with open('logs.txt', 'a') as f:
-            f.write(f'''\nFailed set filters ->
-                        reason \n{e}''')
+@app.route("/set_filters/", methods=['POST'])
+def set_filters():
+    # try:
+    SCRAPPER_CONTROLLER.setFilters(request.json)
+    data = {
+        'status': 'success'
+    }
+    # except Exception as e:
+    #     print(e)
+    #     data = {
+    #         'status': 'failure',
+    #     }
+    #     with open('logs.txt', 'a') as f:
+    #         f.write(f'''\nFailed set filters ->
+    #                     reason \n{e}''')
     return data
 
-@app.post("set_setting/")
-def set_setting(params: list = Depends(location_dict)):
+@app.route("/set_setting/", methods=['POST'])
+def set_setting():
     try:
-        SCRAPPER_CONTROLLER.setFilter(params[0])
+        SCRAPPER_CONTROLLER.setSettings(request.json)
         data = {
             'status': 'success'
         }
     except Exception as e:
+        print(e)
         data = {
             'status': 'failure',
         }
-        with open('logs.txt', 'a') as f:
+        with open('logs.txt', 'w') as f:
             f.write(f'''\nFailed set settings ->
                         reason \n{e}''')
     return data
 # -----------------------PUT REQUESTS-----------------------
 
 
-@app.put('update_filters/')
-def update_filters(params: list = Depends(location_dict)):
+@app.route('/update_filters/', methods=['PUT'])
+def update_filters():
     try:
-        SCRAPPER_CONTROLLER.setFilter(params[0])
+        SCRAPPER_CONTROLLER.setFilters(request.json)
         data = {
             'status': 'success'
         }
@@ -117,7 +117,7 @@ def update_filters(params: list = Depends(location_dict)):
     return data
 
 
-@app.put('run/')
+@app.route('/run/', methods=['PUT'])
 def run():
     try:
         SCRAPPER_CONTROLLER.run()
@@ -134,7 +134,7 @@ def run():
     return data
 
 
-@app.put('stop/')
+@app.route('/stop/', methods=['PUT'])
 def stop():
     try:
         SCRAPPER_CONTROLLER.quitAllThreads()
@@ -151,7 +151,7 @@ def stop():
     return data
 
 
-@app.put('pause/')
+@app.route('/pause/', methods=['PUT'])
 def pause():
     try:
         SCRAPPER_CONTROLLER.pause()
@@ -168,7 +168,7 @@ def pause():
     return data
 
 
-@app.put('unpause/')
+@app.route('/unpause/', methods=['PUT'])
 def unpause():
     try:
         SCRAPPER_CONTROLLER.unpause()
@@ -183,3 +183,7 @@ def unpause():
             f.write(f'''\nFailed run scrapper ->
                         reason \n{e}''')
     return data
+
+
+if __name__ == '__main__':
+    app.run(host= '127.0.0.1',port='8000', debug=True)

@@ -49,7 +49,8 @@ class Datamaster:
 
     @staticmethod
     def setFilters(filters, ApiMaster, to_default=False):
-        if to_default:
+        if not to_default:
+            print(dir(ApiMaster))
             ApiMaster.setFilters(filters)
         else:
             ApiMaster.setToDefault()
